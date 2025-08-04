@@ -1,39 +1,28 @@
-import streamlit as st
-from streamlit_folium import st_folium
-import folium
-from data import load_permit_data
+import pandas as pd
 
-st.set_page_config(page_title="Ontario Permit Intelligence Tracker", layout="wide")
-st.title("📍 Ontario Permit Intelligence Tracker")
-st.markdown("Real-time building permit activity in Toronto (MVP).")
+def load_permit_data():
+    url = "https://ckan0.cf.opendata.inter.prod-toronto.ca/dataset/1cb6f88e-0ac2-4f61-b8b1-04b3a1f1f8ff/resource/26b6cf9d-f10e-4454-993e-6247b3c8a52b/download/issued-building-permits.csv"
+    try:
+        df = pd.read_csv(url, low_memory=False)
+        print("🔎 Columns:", df.columns.tolist())  # ✅ Print for debugging
 
-df = load_permit_data()
+        # Check for existence before selecting
+        expected_cols = ["Permit Type", "Work Type", "Application Date", "Address", "Work Description"]
+        actual_cols = df.columns.tolist()
+        if not all(col in actual_cols for col in expected_cols):
+            return pd.DataFrame()  # Return empty if mismatch
 
-if df.empty:
-    st.error("❌ No data could be loaded from the Toronto Open Data portal.")
-else:
-    st.success("✅ Raw data loaded:")
-    st.dataframe(df.head(5), use_container_width=True)
-
-    keyword = st.text_input("Filter permits by keyword (e.g. 'pharmacy', 'clinic', 'king')", "").strip().lower()
-
-    if keyword:
-        mask = (
-            df["permit_type"].str.lower().str.contains(keyword) |
-            df["address"].str.lower().str.contains(keyword) |
-            df["description"].str.lower().str.contains(keyword) |
-            df["work_type"].str.lower().str.contains(keyword)
-        )
-        filtered_df = df[mask]
-    else:
-        filtered_df = df.head(10)
-
-    st.markdown(f"🔍 Filtered records found: **{len(filtered_df)}**")
-
-    st.subheader("🗂 Permit Records")
-    st.dataframe(filtered_df[["date", "permit_type", "address"]], use_container_width=True)
-
-    st.subheader("🗺 Permit Locations (Static Example)")
-    m = folium.Map(location=[43.7, -79.4], zoom_start=10)
-    folium.Marker([43.7, -79.4], popup="Toronto City Center").add_to(m)
-    st_folium(m, width=700)
+        df = df[expected_cols]
+        df = df.rename(columns={
+            "Permit Type": "permit_type",
+            "Work Type": "work_type",
+            "Application Date": "date",
+            "Address": "address",
+            "Work Description": "description"
+        })
+        df["date"] = pd.to_datetime(df["date"], errors="coerce")
+        df.dropna(subset=["permit_type", "address", "date"], inplace=True)
+        return df
+    except Exception as e:
+        print("❌ Error loading data:", e)
+        return pd.DataFrame()
