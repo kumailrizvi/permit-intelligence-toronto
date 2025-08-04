@@ -24,3 +24,7 @@ def load_permit_data():
     except Exception as e:
         print(f"⚠️ Error loading from API: {e}")
         return pd.DataFrame(columns=["permit_type", "work_type", "date", "address", "description"])
+
+
+print("🔎 Columns from API:", df.columns.tolist())
+
