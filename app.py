@@ -1,39 +1,31 @@
 import streamlit as st
-from streamlit_folium import st_folium
-import folium
 from data import load_permit_data
 
 st.set_page_config(page_title="Ontario Permit Intelligence Tracker", layout="wide")
+
 st.title("📍 Ontario Permit Intelligence Tracker")
-st.markdown("Real-time building permit activity in Toronto (using backup data for now).")
+st.markdown("Real-time building permit activity in **Peel Region** (Mississauga, Brampton, Caledon).")
 
-# Load permit data from local CSV (fallback)
-df = load_permit_data()
+# Load permit data
+try:
+    df = load_permit_data()
+    st.success(f"✅ Loaded {len(df)} permits")
 
-# Optional preview of raw data
-st.write("✅ Loaded permit records:", df.shape[0])
-st.dataframe(df.head(), use_container_width=True)
+    # Filter by date range
+    st.sidebar.header("Filter Options")
+    date_range = st.sidebar.date_input("Permit Date Range", [])
+    if len(date_range) == 2:
+        df = df[(df["date"] >= date_range[0]) & (df["date"] <= date_range[1])]
 
-# Search
-keyword = st.text_input("🔍 Search permits (any keyword):", "").strip().lower()
+    # Filter by permit type
+    permit_types = df["permit_type"].dropna().unique().tolist()
+    selected_types = st.sidebar.multiselect("Permit Types", permit_types, default=permit_types)
+    filtered_df = df[df["permit_type"].isin(selected_types)]
 
-# Filter
-if keyword:
-    mask = (
-        df["permit_type"].str.lower().str.contains(keyword) |
-        df["address"].str.lower().str.contains(keyword) |
-        df["description"].str.lower().str.contains(keyword) |
-        df["work_type"].str.lower().str.contains(keyword)
-    )
-    filtered_df = df[mask]
-else:
-    filtered_df = df.head(15)
+    # Display permits
+    st.subheader("🗂 Permit Records")
+    st.dataframe(filtered_df[["date", "permit_type", "address", "municipality"]], use_container_width=True)
 
-# Table
-st.subheader("🗂 Permit Records")
-st.dataframe(filtered_df[["date", "permit_type", "address", "description"]], use_container_width=True)
-
-# Map placeholder
-st.subheader("🗺 Permit Locations (Static Demo)")
-m = folium.Map(location=[43.7, -79.4], zoom_start=10)
-foli
+except Exception as e:
+    st.error("❌ Failed to load permit data.")
+    st.exception(e)
