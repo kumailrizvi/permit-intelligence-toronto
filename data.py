@@ -1,25 +1,15 @@
+# data.py
 import pandas as pd
-import requests
 
 def load_permit_data():
-    url = "https://services6.arcgis.com/hM5ymMLbxIyWTjn2/arcgis/rest/services/2024_Building_Permits/FeatureServer/0/query"
-    params = {
-        "where": "1=1",
-        "outFields": "PermitType,WorkType,IssuedDate,Address,WorkDesc",
-        "f": "json",
-        "resultRecordCount": 1000
-    }
-    resp = requests.get(url, params=params)
-    resp.raise_for_status()
-    records = resp.json().get("features", [])
-    df = pd.DataFrame([r["attributes"] for r in records])
+    df = pd.read_csv("issued-building-permits-backup.csv")
     df = df.rename(columns={
-        "PermitType": "permit_type",
-        "WorkType": "work_type",
-        "IssuedDate": "date",
+        "Permit Type": "permit_type",
+        "Work Type": "work_type",
+        "Application Date": "date",
         "Address": "address",
-        "WorkDesc": "description"
+        "Work Description": "description"
     })
-    df["date"] = pd.to_datetime(df["date"], unit="ms", errors="coerce")
+    df["date"] = pd.to_datetime(df["date"], errors="coerce")
     df.dropna(subset=["permit_type", "address", "date"], inplace=True)
     return df
