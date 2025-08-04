@@ -26,11 +26,14 @@ if keyword:
 else:
     filtered_df = df.head(10)
 
+# Debugging aid
+st.write("🔍 Filtered records found:", len(filtered_df))
+
 # Show table
 st.subheader("🗂 Permit Records")
 st.dataframe(filtered_df[["date", "permit_type", "address"]], use_container_width=True)
 
-# Map placeholder
+# Static map (placeholder)
 st.subheader("🗺 Permit Locations (Static Example)")
 m = folium.Map(location=[43.7, -79.4], zoom_start=10)
 folium.Marker([43.7, -79.4], popup="Static Example - Toronto").add_to(m)
