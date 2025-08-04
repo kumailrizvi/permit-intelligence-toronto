@@ -1,15 +1,13 @@
-# data.py
 import pandas as pd
 
 def load_permit_data():
-    df = pd.read_csv("issued-building-permits-backup.csv")
-    df = df.rename(columns={
-        "Permit Type": "permit_type",
-        "Work Type": "work_type",
-        "Application Date": "date",
-        "Address": "address",
-        "Work Description": "description"
-    })
-    df["date"] = pd.to_datetime(df["date"], errors="coerce")
+    # Load from local file instead of broken URL
+    df = pd.read_csv("backup_permits.csv", low_memory=False)
+
+    # Clean & rename
+    df = df[["permit_type", "work_type", "application_date", "address", "description"]]
+    df = df.rename(columns={"application_date": "date"})
+    df["date"] = pd.to_datetime(df["date"]).dt.date
     df.dropna(subset=["permit_type", "address", "date"], inplace=True)
+    
     return df
