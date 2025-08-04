@@ -1,2 +1,4 @@
 date,permit_type,address
 2025-08-03,New Building,123 King St
+
+df = pd.read_csv("data/permits.csv")
