@@ -1,0 +1,4 @@
+permit_type,work_type,application_date,address,description
+Building Permit,New,2024-06-01,123 Queen St W,New pharmacy construction
+Plumbing Permit,Alteration,2024-06-05,456 King St E,Interior alterations for clinic
+Electrical Permit,Repair,2024-06-10,789 Bloor St W,Electrical upgrade for medical lab
