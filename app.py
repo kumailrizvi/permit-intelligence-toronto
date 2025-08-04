@@ -9,7 +9,8 @@ st.markdown("Real-time building permit activity in Toronto (MVP).")
 
 # Load data
 df = load_permit_data()
-st.write("✅ Raw data loaded:", df.head())
+st.success("✅ Raw data loaded")
+st.dataframe(df.head(1), use_container_width=True)  # Preview to confirm structure
 
 # Search bar
 keyword = st.text_input("Filter permits by keyword (e.g. 'pharmacy', 'clinic')", "").strip().lower()
@@ -26,14 +27,14 @@ if keyword:
 else:
     filtered_df = df.head(10)
 
-# Debugging aid
-st.write("🔍 Filtered records found:", len(filtered_df))
+st.markdown(f"🔍 Filtered records found: **{len(filtered_df)}**")
 
-# Show table
+# Permit table
 st.subheader("🗂 Permit Records")
-st.dataframe(filtered_df[["date", "permit_type", "address"]], use_container_width=True)
+columns_to_show = [col for col in ["date", "permit_type", "address"] if col in filtered_df.columns]
+st.dataframe(filtered_df[columns_to_show], use_container_width=True)
 
-# Static map (placeholder)
+# Map (static example)
 st.subheader("🗺 Permit Locations (Static Example)")
 m = folium.Map(location=[43.7, -79.4], zoom_start=10)
 folium.Marker([43.7, -79.4], popup="Static Example - Toronto").add_to(m)
