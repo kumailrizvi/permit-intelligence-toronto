@@ -9,6 +9,7 @@ st.markdown("Real-time building permit activity in Toronto (MVP).")
 
 # Load data
 df = load_permit_data()
+st.write("✅ Raw data loaded:", df.head())
 
 # Search bar
 keyword = st.text_input("Filter permits by keyword (e.g. 'pharmacy', 'clinic')", "").strip().lower()
